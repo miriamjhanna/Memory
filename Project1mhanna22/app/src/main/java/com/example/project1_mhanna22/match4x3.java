@@ -164,7 +164,7 @@ public class match4x3 extends AppCompatActivity {
         button.setVisibility(View.INVISIBLE);
         firstButton.setVisibility(View.INVISIBLE);
         numMatch++;
-        instructionsText.setText("They match! Good job! Click one of them to continue.");
+        instructionsText.setText("They match! Good job! Choose a card to continue.");
         matchText.setText(String.valueOf(numMatch));
         if(numMatch == 6){
             gameOver();

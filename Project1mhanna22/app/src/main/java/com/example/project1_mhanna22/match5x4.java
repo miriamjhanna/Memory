@@ -179,7 +179,7 @@ public class match5x4 extends AppCompatActivity {
         button.setVisibility(View.INVISIBLE);
         firstButton.setVisibility(View.INVISIBLE);
         numMatch++;
-        instructionsText.setText("They match! Good job! Click one of them to continue.");
+        instructionsText.setText("They match! Good job! Choose a card to continue.");
         matchText.setText(String.valueOf(numMatch));
         if(numMatch == 10){
             gameOver();

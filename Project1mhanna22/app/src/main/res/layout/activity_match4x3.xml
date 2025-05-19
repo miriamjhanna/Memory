@@ -15,7 +15,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/instructions_string4x3"
-        android:textSize="25sp"
+        android:textSize="18sp"
         android:layout_marginStart="12dp"
         android:layout_marginTop="5dp"
         android:id="@+id/instructions4x3"
