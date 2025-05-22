@@ -25,10 +25,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Mem"
-                android:textSize="60sp"
+                android:textSize="70sp"
                 android:layout_marginTop="25dp"
                 android:textColor="#FFCCED"
-                android:shadowColor="#000000"
+                android:shadowColor="#DB028F"
                 android:shadowDx="1.5"
                 android:shadowDy="1.3"
                 android:shadowRadius="1.6"
@@ -44,10 +44,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="ry"
-                android:textSize="60sp"
+                android:textSize="70sp"
                 android:layout_marginTop="25dp"
                 android:textColor="#FFCCED"
-                android:shadowColor="#000000"
+                android:shadowColor="#DB028F"
                 android:shadowDx="1.5"
                 android:shadowDy="1.3"
                 android:shadowRadius="1.6">
@@ -57,37 +57,111 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/intro_text"
-            android:textSize="36sp"
+            android:textSize="22sp"
             android:layout_marginEnd="10dp"
-            android:layout_marginStart="15dp">
-        </TextView>
-        <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
-            android:text="@string/start_matching4x3"
-            android:textSize="20sp"
-            android:id="@+id/board4x3Button"
-            android:onClick="onButtonClick"
-            android:layout_marginEnd="15dp"
             android:layout_marginStart="15dp"
-            android:backgroundTint="#FFCCED"
             android:textColor="#000000">
-        </Button>
-        <Button
+        </TextView>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Select Card Theme:"
+            android:layout_marginEnd="60dp"
+            android:textSize="25sp"
+            android:layout_marginTop="50dp">
+        </TextView>
+        <RadioGroup
+            android:id="@+id/radio_card_theme"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="50dp"
+            android:layout_marginEnd="30dp">
+
+            <RadioButton
+                android:id="@+id/radio_simple_cartoon"
+                android:text="Simple Cartoon Icons"
+                android:textSize="22sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:id="@+id/desc_simple"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="A selection of simple cartoon icons. The collection of icons are the same for each game."
+                android:textColor="@color/magenta"
+                android:textSize="18sp"
+                android:layout_marginStart="33dp"
+                android:visibility="gone"/>
+
+            <RadioButton
+                android:id="@+id/radio_emojis"
+                android:text="Emojis"
+                android:textSize="22sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:id="@+id/desc_emojis"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="A random selection of the emojis on your phone. The emojis change each game."
+                android:textColor="@color/magenta"
+                android:textSize="18sp"
+                android:layout_marginStart="33dp"
+                android:visibility="gone"/>
+
+            <RadioButton
+                android:id="@+id/radio_playing_cards"
+                android:text="Playing Cards"
+                android:textSize="22sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:id="@+id/desc_playing"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="A random selection from a 52-card standard deck. The selected cards change each game."
+                android:textColor="@color/magenta"
+                android:textSize="18sp"
+                android:layout_marginStart="33dp"
+                android:visibility="gone"/>
+        </RadioGroup>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/board4x3Button"
+            style="?attr/materialButtonOutlinedStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:text="@string/start_matching5x4"
+            android:text="@string/start_matching4x3"
+            android:layout_marginTop="40dp"
             android:textSize="20sp"
-            android:id="@+id/board5x4Button"
-            android:onClick="onButtonClick"
+            android:background="@drawable/btn_gradient_selector"
+            android:textColor="@color/white"
+            app:backgroundTint="@null"
             android:layout_marginEnd="15dp"
             android:layout_marginStart="15dp"
-            android:backgroundTint="#FFCCED"
-            android:textColor="#000000"
-            >
-        </Button>
+            android:onClick="onButtonClick"
+            android:insetBottom="0dp" android:insetTop="0dp"
+            android:insetLeft="0dp" android:insetRight="0dp"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/board5x4Button"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/start_matching5x4"
+            android:layout_marginTop="10dp"
+            android:textSize="20sp"
+            android:background="@drawable/btn_gradient_selector"
+            android:textColor="@color/white"
+            app:backgroundTint="@null"
+            android:layout_marginEnd="15dp"
+            android:layout_marginStart="15dp"
+            android:onClick="onButtonClick"
+            android:insetBottom="0dp" android:insetTop="0dp"
+            android:insetLeft="0dp" android:insetRight="0dp"/>
     </LinearLayout>
 </LinearLayout>
 </ScrollView>

@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- existing -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- new brand colours -->
+    <color name="magenta">#DB028F</color>
+    <color name="pink">#FFCCED</color>
 </resources>
