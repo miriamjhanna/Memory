@@ -59,8 +59,7 @@
             android:text="@string/intro_text"
             android:textSize="22sp"
             android:layout_marginEnd="10dp"
-            android:layout_marginStart="15dp"
-            android:textColor="#000000">
+            android:layout_marginStart="15dp">
         </TextView>
         <TextView
             android:layout_width="wrap_content"
@@ -79,51 +78,57 @@
 
             <RadioButton
                 android:id="@+id/radio_simple_cartoon"
-                android:text="Simple Cartoon Icons"
+                android:text=" Simple Cartoon Icons"
                 android:textSize="22sp"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:button="@drawable/radio_square_selector"
+                android:buttonTint="@color/magenta"
+                app:buttonTint="@color/magenta" />
 
             <TextView
                 android:id="@+id/desc_simple"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="A selection of simple cartoon icons. The collection of icons are the same for each game."
-                android:textColor="@color/magenta"
                 android:textSize="18sp"
                 android:layout_marginStart="33dp"
                 android:visibility="gone"/>
 
             <RadioButton
                 android:id="@+id/radio_emojis"
-                android:text="Emojis"
+                android:text=" Emojis"
                 android:textSize="22sp"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:button="@drawable/radio_square_selector"
+                android:buttonTint="@color/magenta"
+                app:buttonTint="@color/magenta" />
 
             <TextView
                 android:id="@+id/desc_emojis"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="A random selection of the emojis on your phone. The emojis change each game."
-                android:textColor="@color/magenta"
                 android:textSize="18sp"
                 android:layout_marginStart="33dp"
                 android:visibility="gone"/>
 
             <RadioButton
                 android:id="@+id/radio_playing_cards"
-                android:text="Playing Cards"
+                android:text=" Playing Cards"
                 android:textSize="22sp"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:button="@drawable/radio_square_selector"
+                android:buttonTint="@color/magenta"
+                app:buttonTint="@color/magenta" />
 
             <TextView
                 android:id="@+id/desc_playing"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="A random selection from a 52-card standard deck. The selected cards change each game."
-                android:textColor="@color/magenta"
                 android:textSize="18sp"
                 android:layout_marginStart="33dp"
                 android:visibility="gone"/>

@@ -1,7 +1,6 @@
 package com.example.project1_mhanna22;
 
 import android.content.Intent;
-import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.RadioButton;
@@ -16,7 +15,6 @@ import androidx.core.view.WindowInsetsCompat;
 
 public class MainActivity extends AppCompatActivity {
 
-    // keeps the current theme choice; default = simple cartoon
     private String selectedTheme = "simple";
 
     @Override
@@ -30,60 +28,47 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
-        /* ---------- set up RADIO-GROUP logic ---------- */
-        RadioGroup grp = findViewById(R.id.radio_card_theme);
-        RadioButton rbSimple  = findViewById(R.id.radio_simple_cartoon);
-        RadioButton rbEmojis  = findViewById(R.id.radio_emojis);
-        RadioButton rbCards   = findViewById(R.id.radio_playing_cards);
+        RadioGroup grp       = findViewById(R.id.radio_card_theme);
+        RadioButton rbSimple = findViewById(R.id.radio_simple_cartoon);
+        RadioButton rbEmoji  = findViewById(R.id.radio_emojis);
+        RadioButton rbCards  = findViewById(R.id.radio_playing_cards);
 
-        TextView descSimple   = findViewById(R.id.desc_simple);
-        TextView descEmojis   = findViewById(R.id.desc_emojis);
-        TextView descPlaying  = findViewById(R.id.desc_playing);
-
-        // tint that matches the spec colour
-        ColorStateList magentaTint = ColorStateList.valueOf(getColor(R.color.magenta));
+        TextView descSimple  = findViewById(R.id.desc_simple);
+        TextView descEmoji   = findViewById(R.id.desc_emojis);
+        TextView descCards   = findViewById(R.id.desc_playing);
 
         grp.setOnCheckedChangeListener((group, checkedId) -> {
-            // reset all descriptions
             descSimple.setVisibility(View.GONE);
-            descEmojis.setVisibility(View.GONE);
-            descPlaying.setVisibility(View.GONE);
+            descEmoji.setVisibility(View.GONE);
+            descCards.setVisibility(View.GONE);
 
             if (checkedId == R.id.radio_simple_cartoon) {
-                selectedTheme = "simple";
-                descSimple.setVisibility(View.VISIBLE);
+                selectedTheme = "simple";  descSimple.setVisibility(View.VISIBLE);
             } else if (checkedId == R.id.radio_emojis) {
-                selectedTheme = "emoji";
-                descEmojis.setVisibility(View.VISIBLE);
-            } else if (checkedId == R.id.radio_playing_cards) {
-                selectedTheme = "playing";
-                descPlaying.setVisibility(View.VISIBLE);
+                selectedTheme = "emoji";   descEmoji.setVisibility(View.VISIBLE);
+            } else {
+                selectedTheme = "playing"; descCards.setVisibility(View.VISIBLE);
             }
 
-            // colour the chosen radio button & label
+            /* magenta text for chosen option */
             for (int i = 0; i < group.getChildCount(); i++) {
-                View child = group.getChildAt(i);
-                if (child instanceof RadioButton) {
-                    RadioButton rb = (RadioButton) child;
-                    rb.setTextColor(rb.getId() == checkedId ? getColor(R.color.magenta)
-                            : getColor(R.color.black));
-                    rb.setButtonTintList(rb.getId() == checkedId ? magentaTint : null);
+                View c = group.getChildAt(i);
+                if (c instanceof RadioButton) {
+                    ((RadioButton) c).setTextColor(
+                            c.getId() == checkedId
+                                    ? getColor(R.color.magenta)
+                                    : getColor(R.color.black));
                 }
             }
         });
 
-        // pre-select the first option so UI is consistent
-        rbSimple.setChecked(true);
+        rbSimple.setChecked(true);   // default
     }
 
-    /* ---------- BOARD BUTTON callback ---------- */
-    public void onButtonClick(View view) {
-        Intent intent;
-        if (view.getId() == R.id.board4x3Button) {
-            intent = new Intent(this, match4x3.class);
-        } else { // R.id.board5x4Button
-            intent = new Intent(this, match5x4.class);
-        }
+    public void onButtonClick(View v) {
+        Intent intent = (v.getId() == R.id.board4x3Button)
+                ? new Intent(this, match4x3.class)
+                : new Intent(this, match5x4.class);
         intent.putExtra("theme", selectedTheme);
         startActivity(intent);
     }

@@ -1,9 +1,12 @@
 package com.example.project1_mhanna22;
 
 import android.app.AlertDialog;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.os.Bundle;
+import android.util.TypedValue;
 import android.view.View;
-import android.widget.GridLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -15,181 +18,266 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-
+import java.util.Random;
 
 public class match4x3 extends AppCompatActivity {
-    int[] bitmaps;
 
-    int[] cards;
+    /* =====  STATIC  ===== */
+    static final String[] EMOJI_POOL = {
+            "😀","😁","😂","🤣","😃","😄","😅","😆","😉","😊","😋","😎",
+            "😍","😘","🥰","😗","😙","😚","🙂","🤗","🤩","🤔","🤨","😐",
+            "😑","😶","🙄","😏","😣","😥","😮","🤐","😯","😪","😫","🥱",
+            "😴","😌","😛","😜","😝","🤤","😒","😓","😔","😕","🙃","🤑",
+            "😲","☹️","🙁","😖","😞","😟","😤","😢","😭","😦","😧","😨",
+            "😩","🤯","😬","😰","😱","🥵","🥶","😳","🤪","😵","😡","😠",
+            "🤬","😷","🤒","🤕","🤠","😇"
+    };
 
-    int numMatch;
+    /* =====  FIELDS  ===== */
+    private int[] cards;          // 12 ImageButton view-IDs
+    private int   cardBack;       // theme-specific back drawable
+    private String theme;         // simple | emoji | playing
 
-    int numMiss;
-
-    Deck mappedDeck4x3;
-    List<Card> cardDeck;
-
+    private Deck deck;
     private Card firstCard = null;
-
     private ImageButton firstButton = null, processingFirst, processingSecond;
-
     private boolean processing = false, waiting = false;
 
-    private int cardBack = R.drawable.cs477p1_cardback;
-
+    private int numMatch, numMiss;
     private TextView matchText, missText, instructionsText;
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
+
+    /* ===================================================== */
+    @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_match4x3);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(bars.left, bars.top, bars.right, bars.bottom);
             return insets;
         });
 
-        View clickListener = findViewById(R.id.main);
-        clickListener.setClickable(true);
-        clickListener.setOnClickListener(v ->{
-            if(waiting){
-                //flip 2 cards over
-                if(processingFirst != null){
-                    processingFirst.setImageResource(cardBack);
-                    processingFirst.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                }
-                if(processingSecond != null){
-                    processingSecond.setImageResource(cardBack);
-                    processingSecond.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                }
-                processing = false;
-                waiting = false;
-                processingFirst = null;
-                processingSecond = null;
-            }
-        });
-        assignCards();
-        matchText = findViewById(R.id.num_match4x3);
-        missText = findViewById(R.id.num_miss4x3);
+        theme = getIntent().getStringExtra("theme");
+        if (theme == null) theme = "simple";
+
+        assignCards();                 // build Deck + pick correct back
+        paintSlotsThemeBackground();   // slot corners match app background
+        setInitialCardBacks();         // draw backs immediately
+
+        matchText        = findViewById(R.id.num_match4x3);
+        missText         = findViewById(R.id.num_miss4x3);
         instructionsText = findViewById(R.id.instructions4x3);
 
-        numMatch = 0;
-        numMiss = 0;
-    }
-    protected void assignCards(){
-        bitmaps = new int[6];
-        bitmaps[0] = R.drawable.academy_brush_color_paint_pallete_icon;
-        bitmaps[1] = R.drawable.animal_marine_prawn_seafood_shrimp_icon;
-        bitmaps[2] = R.drawable.app_brand_brands_logo_logos_icon;
-        bitmaps[3] = R.drawable.cat_icon;
-        bitmaps[4] = R.drawable.brain_divide_inkcontober_sains_icon;
-        bitmaps[5] = R.drawable.floor_laughing_on_rolling_the_icon;
-
-        cards = new int[12];
-        cards[0] = R.id.card4x3_00;
-        cards[1] = R.id.card4x3_01;
-        cards[2] = R.id.card4x3_02;
-        cards[3] = R.id.card4x3_10;
-        cards[4] = R.id.card4x3_11;
-        cards[5] = R.id.card4x3_12;
-        cards[6] = R.id.card4x3_20;
-        cards[7] = R.id.card4x3_21;
-        cards[8] = R.id.card4x3_22;
-        cards[9] = R.id.card4x3_30;
-        cards[10] = R.id.card4x3_31;
-        cards[11] = R.id.card4x3_32;
-
-        mappedDeck4x3 = new Deck(cards, bitmaps);
-        cardDeck = mappedDeck4x3.getDeck();
+        findViewById(R.id.main).setOnClickListener(v -> { if (waiting) flipBackTwo(); });
     }
 
-    public void onCardClick4x3(View view){
-        if(waiting){
-            isWaiting();
-            return;
+    /* ---------------------- BOARD BUILD ---------------------- */
+    private void assignCards() {
+        cards = new int[] {
+                R.id.card4x3_00, R.id.card4x3_01, R.id.card4x3_02,
+                R.id.card4x3_10, R.id.card4x3_11, R.id.card4x3_12,
+                R.id.card4x3_20, R.id.card4x3_21, R.id.card4x3_22,
+                R.id.card4x3_30, R.id.card4x3_31, R.id.card4x3_32
+        };
+
+        switch (theme) {
+            case "playing":
+                cardBack = R.drawable.cardback_playing;
+                deck     = new Deck(cards, getRandomPlayingCards(6));
+                break;
+
+            case "emoji":
+                cardBack = R.drawable.cs477p1_cardback;
+                deck     = new Deck(cards, getRandomEmojiBitmaps(6));
+                break;
+
+            default:  /* simple cartoon */
+                cardBack = R.drawable.cs477p1_cardback;
+                deck     = new Deck(cards, getSimpleDrawables());
         }
-        if(processing){
-            return;
-        }
-        ImageButton button = (ImageButton) view;
-        int cardId = button.getId();
-        Card currCard = mappedDeck4x3.getCardById(cardId);
-        if(currCard == null){
-            return;
-        }
-        if(firstCard != null && cardId == firstCard.getCardId()){
-            Toast.makeText(getApplicationContext(), "Select a new card!", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        int pic = currCard.getPicture();
-        button.setImageResource(pic);
-        button.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-        //first card selected
-        if(firstCard == null){
-            firstCard = currCard;
-            firstButton = button;
-            instructionsText.setText("Choose a second card.");
-            return;
-        }
-        //matching cards!
-        else if (firstCard.getPicture() == currCard.getPicture()) {
-            cardMatch(button);
-        }
-        //no match
-        else {
-            noMatch(button);
-        }
-        firstButton = null;
-        firstCard = null;
     }
-    private void isWaiting(){
-        if(processingFirst != null){
+
+    /* ---------- make slot bg match app theme ---------- */
+    private void paintSlotsThemeBackground() {
+        int bgColor = resolveThemeColor(android.R.attr.colorBackground);
+        for (int id : cards) ((ImageButton) findViewById(id)).setBackgroundColor(bgColor);
+    }
+
+    private int resolveThemeColor(int attr) {
+        TypedValue tv = new TypedValue();
+        getTheme().resolveAttribute(attr, tv, true);
+        return tv.data;
+    }
+
+    private void setInitialCardBacks() {
+        for (int id : cards) {
+            ImageButton b = findViewById(id);
+            b.setImageResource(cardBack);
+            b.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        }
+    }
+
+    /* -------------------- FACE PROVIDERS -------------------- */
+    private int[] getSimpleDrawables() {
+        return new int[] {
+                R.drawable.academy_brush_color_paint_pallete_icon,
+                R.drawable.animal_marine_prawn_seafood_shrimp_icon,
+                R.drawable.app_brand_brands_logo_logos_icon,
+                R.drawable.cat_icon,
+                R.drawable.brain_divide_inkcontober_sains_icon,
+                R.drawable.floor_laughing_on_rolling_the_icon
+        };
+    }
+
+    private int[] getRandomPlayingCards(int n) {
+        int[] all = {
+                /* spades */
+                R.drawable.ace_spades,   R.drawable.two_spades,  R.drawable.three_spades,
+                R.drawable.four_spades,  R.drawable.five_spades, R.drawable.six_spades,
+                R.drawable.seven_spades, R.drawable.eight_spades,R.drawable.nine_spades,
+                R.drawable.ten_spades,   R.drawable.jack_spades, R.drawable.queen_spades,
+                R.drawable.king_spades,
+                /* hearts */
+                R.drawable.ace_hearts,   R.drawable.two_hearts,  R.drawable.three_hearts,
+                R.drawable.four_hearts,  R.drawable.five_hearts, R.drawable.six_hearts,
+                R.drawable.seven_hearts, R.drawable.eight_hearts,R.drawable.nine_hearts,
+                R.drawable.ten_hearts,   R.drawable.jack_hearts, R.drawable.queen_hearts,
+                R.drawable.king_hearts,
+                /* diamonds */
+                R.drawable.ace_diamonds, R.drawable.two_diamonds,R.drawable.three_diamonds,
+                R.drawable.four_diamonds,R.drawable.five_diamonds,R.drawable.six_diamonds,
+                R.drawable.seven_diamonds,R.drawable.eight_diamonds,R.drawable.nine_diamonds,
+                R.drawable.ten_diamonds, R.drawable.jack_diamonds,R.drawable.queen_diamonds,
+                R.drawable.king_diamonds,
+                /* clubs */
+                R.drawable.ace_clubs,    R.drawable.two_clubs,   R.drawable.three_clubs,
+                R.drawable.four_clubs,   R.drawable.five_clubs,  R.drawable.six_clubs,
+                R.drawable.seven_clubs,  R.drawable.eight_clubs, R.drawable.nine_clubs,
+                R.drawable.ten_clubs,    R.drawable.jack_clubs,  R.drawable.queen_clubs,
+                R.drawable.king_clubs
+        };
+        List<Integer> bag = new ArrayList<>();
+        for (int id : all) bag.add(id);
+        Collections.shuffle(bag, new Random());
+
+        int[] out = new int[n];
+        for (int i = 0; i < n; i++) out[i] = bag.get(i);
+        return out;
+    }
+
+    private Bitmap[] getRandomEmojiBitmaps(int n) {
+        List<String> pool = new ArrayList<>();
+        Collections.addAll(pool, EMOJI_POOL);
+        Collections.shuffle(pool, new Random());
+
+        Bitmap[] out = new Bitmap[n];
+        for (int i = 0; i < n; i++) out[i] = makeEmojiBitmap(pool.get(i));
+        return out;
+    }
+
+    private Bitmap makeEmojiBitmap(String e) {
+        int px = (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP, 72, getResources().getDisplayMetrics());
+
+        Bitmap bmp = Bitmap.createBitmap(px, px, Bitmap.Config.ARGB_8888);
+        Canvas c   = new Canvas(bmp);
+
+        Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
+        p.setTextSize(px * 0.8f);
+        p.setTextAlign(Paint.Align.CENTER);
+
+        Paint.FontMetrics fm = p.getFontMetrics();
+        float x = px / 2f;
+        float y = px / 2f - (fm.ascent + fm.descent) / 2f;
+        c.drawText(e, x, y, p);
+
+        return bmp;
+    }
+
+    /* ---------------------- GAMEPLAY ---------------------- */
+    public void onCardClick4x3(View v) {
+        if (waiting) { flipBackTwo(); return; }
+        if (processing) return;
+
+        ImageButton btn = (ImageButton) v;
+        Card curr = deck.getCardById(btn.getId());
+        if (curr == null) return;
+        if (firstCard != null && curr.getCardId() == firstCard.getCardId()) {
+            Toast.makeText(this, "Select a different card!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        revealFace(btn, curr);
+
+        if (firstCard == null) { firstCard = curr; firstButton = btn;
+            instructionsText.setText("Choose a second card."); return; }
+
+        if (isMatch(firstCard, curr)) cardMatch(btn);
+        else                           noMatch(btn);
+
+        firstCard = null; firstButton = null;
+    }
+
+    private void revealFace(ImageButton b, Card c) {
+        if (c.hasBitmap()) b.setImageBitmap(c.getBitmap());
+        else               b.setImageResource(c.getDrawableRes());
+
+        b.setScaleType("playing".equals(theme)
+                ? ImageView.ScaleType.CENTER_CROP
+                : ImageView.ScaleType.CENTER_INSIDE);
+    }
+
+    private boolean isMatch(Card a, Card b) {
+        if (a.hasBitmap() && b.hasBitmap())   return a.getBitmap() == b.getBitmap();
+        if (!a.hasBitmap() && !b.hasBitmap()) return a.getDrawableRes() == b.getDrawableRes();
+        return false;
+    }
+
+    /* ------------- match / miss / flip-back / victory ------------- */
+    private void flipBackTwo() {
+        if (processingFirst != null) {
             processingFirst.setImageResource(cardBack);
             processingFirst.setScaleType(ImageView.ScaleType.CENTER_CROP);
         }
-        if(processingSecond != null){
+        if (processingSecond != null) {
             processingSecond.setImageResource(cardBack);
             processingSecond.setScaleType(ImageView.ScaleType.CENTER_CROP);
         }
-        processing = false;
-        waiting = false;
-        processingFirst = null;
-        processingSecond = null;
+        processing = waiting = false;
+        processingFirst = processingSecond = null;
     }
 
-    private void cardMatch(ImageButton button){
-        button.setEnabled(false);
-        firstButton.setEnabled(false);
-        button.setVisibility(View.INVISIBLE);
-        firstButton.setVisibility(View.INVISIBLE);
-        numMatch++;
-        instructionsText.setText("They match! Good job! Choose a card to continue.");
-        matchText.setText(String.valueOf(numMatch));
-        if(numMatch == 6){
-            gameOver();
-        }
+    private void cardMatch(ImageButton b) {
+        b.setEnabled(false); firstButton.setEnabled(false);
+        b.setVisibility(View.INVISIBLE); firstButton.setVisibility(View.INVISIBLE);
+        matchText.setText(String.valueOf(++numMatch));
+        instructionsText.setText("They match! Choose another card.");
+        if (numMatch == 6) gameOver();
     }
-    private void noMatch(ImageButton button){
-        numMiss++;
-        instructionsText.setText("Oh no! Keep trying. Click anywhere to continue.");
-        missText.setText(String.valueOf(numMiss));
-        processing = true;
-        waiting = true;
-        processingFirst = firstButton;
-        processingSecond = button;
+
+    private void noMatch(ImageButton b) {
+        missText.setText(String.valueOf(++numMiss));
+        instructionsText.setText("No match – tap anywhere to continue.");
+        processing = waiting = true;
+        processingFirst = firstButton; processingSecond = b;
     }
-    private void gameOver(){
-        new AlertDialog.Builder(match4x3.this)
+
+    /* ---------- end-of-game dialog ---------- */
+    private void gameOver() {
+        AlertDialog dialog = new AlertDialog.Builder(this)
                 .setIcon(R.drawable.dessert_donut_food_sweet_icon)
                 .setTitle("Game Over")
-                .setMessage("Do you want to play again?")
-                .setPositiveButton("Yes", (dialog, which) -> {
-                    recreate();
-                })
-                .setNegativeButton("No", (dialog, which) -> {
-                    finish();
-                })
-                .show();
+                .setMessage("Play again?")
+                .setPositiveButton("Yes", (d, w) -> recreate())
+                .setNegativeButton("No",  (d, w) -> finish())
+                .create();
+
+        dialog.show();
+        int magenta = getColor(R.color.magenta);
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(magenta);
+        dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(magenta);
     }
 }
